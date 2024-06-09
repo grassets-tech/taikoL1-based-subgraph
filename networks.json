@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "TaikoL1": {
+      "address": "0xB9E1E58bcF33B79CcfF99c298963546a6c334388",
+      "startBlock": 19960128
+    }
+  }
+}

@@ -1,0 +1,239 @@
+enum Status {
+  PROPOSED
+  PROVED
+  VERIFIED
+  CONTESTED
+}
+
+type BlockL2 @entity {
+  id: ID!
+  blockId: BigInt! # uint256
+  blockTimestamp: BigInt
+  blockHash: Bytes
+  status: Status
+  proposed: [BlockProposed!] @derivedFrom(field: "blockL2")
+  verified: [BlockVerified!]! @derivedFrom(field: "blockL2")
+  proved: [TransitionProved!]! @derivedFrom(field: "blockL2")
+  contested: [TransitionContested!]! @derivedFrom(field: "blockL2")
+}
+
+type Account @entity {
+  id: ID!
+  prover: [Prover!] @derivedFrom(field: "account")
+  proposer: [Proposer!]! @derivedFrom(field: "account")
+  contester: [Contester!]! @derivedFrom(field: "account")
+  isProver: Boolean
+  isProposer: Boolean
+  isContester: Boolean
+}
+
+type Prover @entity {
+  id: ID!
+  account: Account!
+  blockProved: [TransitionProved!]! @derivedFrom(field: "prover")
+  totalBlockProved: Int!
+}
+
+type Proposer @entity {
+  id: ID!
+  account: Account!
+  blockProposed: [BlockProposed!] @derivedFrom(field: "proposer")
+  totalBlockProposed: Int!
+}
+
+type Contester @entity {
+  id: ID!
+  account: Account!
+  blockContested: [TransitionContested!] @derivedFrom(field: "contester")
+  totalBlockContested: Int!
+}
+
+type BlockProposed @entity(immutable: true) {
+  id: Bytes!
+
+  proposerId: Bytes!
+  proposer: Proposer!
+  txGasPrice: BigInt!
+  txGasUsed: BigInt!
+  txFee: BigInt!
+
+  blockL2: BlockL2!
+  blockIdL2: BigInt! # uint256
+  assignedProver: Bytes! # address
+  livenessBond: BigInt! # uint96
+  meta_l1Hash: Bytes! # bytes32
+  meta_difficulty: Bytes! # bytes32
+  meta_blobHash: Bytes! # bytes32
+  meta_extraData: Bytes! # bytes32
+  meta_depositsHash: Bytes! # bytes32
+  meta_coinbase: Bytes! # address
+  meta_id: BigInt! # uint64
+  meta_gasLimit: BigInt! # uint32
+  meta_timestamp: BigInt! # uint64
+  meta_l1Height: BigInt! # uint64
+  meta_minTier: Int! # uint16
+  meta_blobUsed: Boolean! # bool
+  meta_parentMetaHash: Bytes! # bytes32
+  blockNumberL1: BigInt!
+  blockTimestampL1: BigInt!
+  transactionHashL1: Bytes!
+}
+
+type TransitionContested @entity(immutable: true) {
+  id: Bytes!
+
+  blockL2: BlockL2!
+  blockIdL2: BigInt! # uint256
+
+  tran_parentHash: Bytes! # bytes32
+  tran_blockHash: Bytes! # bytes32
+  tran_stateRoot: Bytes! # bytes32
+  tran_graffiti: Bytes! # bytes32
+  contesterId: Bytes! # address
+  contester: Contester! 
+  contestBond: BigInt! # uint96
+  tier: Int! # uint16
+
+  blockNumberL1: BigInt!
+  blockTimestampL1: BigInt!
+  transactionHashL1: Bytes!
+
+  txGasPrice: BigInt!
+  txGasUsed: BigInt!
+  txFee: BigInt!
+}
+
+type TransitionProved @entity(immutable: true) {
+  id: Bytes!
+
+  blockL2: BlockL2!
+  blockIdL2: BigInt! # uint256
+
+  tran_parentHash: Bytes! # bytes32
+  tran_blockHash: Bytes! # bytes32
+  tran_stateRoot: Bytes! # bytes32
+  tran_graffiti: Bytes! # bytes32
+  validityBond: BigInt! # uint96
+  tier: Int! # uint16
+
+  blockNumberL1: BigInt!
+  blockTimestampL1: BigInt!
+  transactionHashL1: Bytes!
+
+  proverId: Bytes!
+  prover: Prover!
+  txGasPrice: BigInt!
+  txGasUsed: BigInt!
+  txFee: BigInt!
+}
+
+type BlockVerified @entity(immutable: true) {
+  id: Bytes!
+
+  blockL2: BlockL2!
+  blockIdL2: BigInt! # uint256
+
+  assignedProver: Bytes! # address
+  prover: Bytes! # address
+  blockHash: Bytes! # bytes32
+  stateRoot: Bytes! # bytes32
+  tier: Int! # uint16
+  
+  blockNumberL1: BigInt!
+  blockTimestampL1: BigInt!
+  transactionHashL1: Bytes!
+
+  txGasPrice: BigInt!
+  txGasUsed: BigInt!
+  txFee: BigInt!
+}
+
+type AdminChanged @entity(immutable: true) {
+  id: Bytes!
+  previousAdmin: Bytes! # address
+  newAdmin: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type BeaconUpgraded @entity(immutable: true) {
+  id: Bytes!
+  beacon: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Initialized @entity(immutable: true) {
+  id: Bytes!
+  version: Int! # uint8
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferStarted @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ProvingPaused @entity(immutable: true) {
+  id: Bytes!
+  paused: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StateVariablesUpdated @entity(immutable: true) {
+  id: Bytes!
+  slotB_numBlocks: BigInt! # uint64
+  slotB_lastVerifiedBlockId: BigInt! # uint64
+  slotB_provingPaused: Boolean! # bool
+  slotB___reservedB1: Int! # uint8
+  slotB___reservedB2: Int! # uint16
+  slotB___reservedB3: BigInt! # uint32
+  slotB_lastUnpausedAt: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Upgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
