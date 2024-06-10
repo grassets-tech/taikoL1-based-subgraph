@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0x06a9Ab27c7e2255df1815E6CC0168d7755Feb19a"
       abi: TaikoL1
-      startBlock: 19960128
+      startBlock: 19773965
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
